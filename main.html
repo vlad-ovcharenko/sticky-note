@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<body>
+<style>
+  body {
+    padding: 0 20px 20px 20px;
+    background-color: #fff;
+  }
+  .checkbox-label {
+
+  }
+  #note {
+    cursor: move;
+    position: absolute;
+    z-index: 9;
+    background-color: #ffc32b;
+    text-align: center;
+    width: 250px;
+    height: 250px;
+    border-radius: 20px;
+    padding: 20px;
+  }
+  #note:focus {
+    outline-color: #96731a;
+  }
+  .resizer {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #96731a;
+    position: absolute;
+  }
+  .resizer__top-left {
+    left: -12px;
+    top: -12px;
+    cursor: nwse-resize; /*resizer cursor*/
+  }
+  .resizer__top-right {
+    right: -12px;
+    top: -12px;
+    cursor: nesw-resize;
+  }
+  .resizer__bottom-left {
+    left: -12px;
+    bottom: -12px;
+    cursor: nesw-resize;
+  }
+  .resizer__bottom-right {
+    right: -12px;
+    bottom: -12px;
+    cursor: nwse-resize;
+  }
+  textarea {
+    background: transparent;
+    border: none;
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline-color: #96731a;
+    font-size: 15px;
+    resize: none;
+  }
+
+  input:focus, textarea:focus, select:focus{
+    outline: none;
+  }
+</style>
+
+<header>
+  <input class="checkbox" type="checkbox" id="dragOutsidePageMode" name="dragOutsidePageMode">
+  <label class="checkbox-label" for="dragOutsidePageMode">
+    partially outside page</label>
+</header>
+  <div id="note">
+    <textarea>* find grate job</textarea>
+  </div>
+
+
+<script>
+  const partiallyModeCheckbox = document.getElementById('dragOutsidePageMode')
+  let isPartiallyMode = partiallyModeCheckbox.checked
+  let dragOutsidePageMode = 'PARTIALLY'
+
+  dragElement("note");
+  // resizeElement('note')
+
+  partiallyModeCheckbox.addEventListener('input', function (ev) {
+    isPartiallyMode = ev.target.checked
+    dragElement('note')
+  })
+
+  function dragElement(id, remove = false) {
+    const el = document.getElementById(id)
+
+    el.style.cursor = 'move'
+    let pos1 = 0, pos2 = 0, startX = 0, startY = 0;
+    el.onmousedown = dragMouseDown;
+
+    function dragMouseDown(ev) {
+      startX = ev.clientX;
+      startY = ev.clientY;
+      document.onmouseup = closeDragElement;
+      document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(ev) {
+      ev.preventDefault();
+      pos1 = startX - ev.clientX;
+      pos2 = startY - ev.clientY;
+      console.log('pos1', pos1, 'pos2', pos2)
+      startX = ev.clientX;
+      startY = ev.clientY;
+      el.style.top = `${el.offsetTop - pos2}px`;
+      el.style.left = `${el.offsetLeft - pos1}px`;
+    }
+    function closeDragElement() {
+      document.onmouseup = null;
+      document.onmousemove = null;
+
+      handleDragOutsidePageMode()
+    }
+
+    function handleDragOutsidePageMode () {
+      const ww = window.innerWidth
+      const wh = window.innerHeight
+      const ot = el.offsetTop
+      const ol = el.offsetLeft
+      const oh = el.offsetHeight
+      const ow = el.offsetWidth
+
+      if (isPartiallyMode) {
+        if (ot < -oh + 30) el.style.top = `${-oh + 30}px`
+        if (ol > ww - 30) el.style.left = `${ww - 30}px`
+        if (ot > wh - 30) el.style.top = `${wh - 30}px`
+        if (ol < -ow + 30) el.style.left = `${-ow + 30}px`
+      } else  {
+        if (ot < 0) el.style.top = '0px'
+        if (ol + ow > ww) el.style.left = `${ww - ow}px`
+        if (ot > wh) el.style.top = `${wh - oh}px`
+        if (ol < 0) el.style.left = '0px'
+      }
+    }
+  }
+</script>
+</body>
+</html>
